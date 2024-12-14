@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Legendas SRT</title>
+    <!-- Fonte Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-background: #333;
+            --color-surface: #ffffff;
+            --color-text-primary: #111;
+            --color-text-secondary: #333;
+            --color-border: #ddd;
+
+            --color-btn-green: #00c853;
+            --color-btn-green-hover: #00b44a;
+            --color-btn-red: #ff5252;
+            --color-btn-red-hover: #e04848;
+            --color-btn-dark: #333;
+            --color-btn-dark-hover: #222;
+
+            --font-family-base: 'Poppins', sans-serif;
+            --font-size-base: 16px;
+
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 40px;
+
+            --radius-sm: 4px;
+            --radius-md: 8px;
+
+            --transition-fast: 0.2s ease-in-out;
+
+            --placeholder-color: #888;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family-base);
+            font-size: var(--font-size-base);
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: var(--spacing-lg);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: var(--spacing-xs);
+            color: #fff;
+        }
+
+        header h2 {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #ddd;
+        }
+
+        .container {
+            background-color: var(--color-surface);
+            border-radius: var(--radius-md);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: var(--spacing-xl);
+            max-width: 600px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        textarea {
+            width: 100%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            resize: vertical;
+            font-family: var(--font-family-base);
+            background-color: #fff;
+            transition: border-color var(--transition-fast);
+            min-height: 180px;
+            font-weight: 400;
+        }
+
+        textarea:focus {
+            border-color: #aaa;
+            outline: none;
+        }
+
+        textarea::placeholder {
+            color: var(--placeholder-color);
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        #resultado {
+            width: 100%;
+            min-height: 200px;
+            padding: var(--spacing-md);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            background-color: #fcfcfc;
+            white-space: pre;
+            overflow: auto;
+            font-family: monospace;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        #resultado:empty::before {
+            content: "O resultado SRT aparecerá aqui.";
+            color: var(--placeholder-color);
+            font-style: italic;
+            font-weight: 400;
+            font-family: var(--font-family-base);
+        }
+
+        /* Botões */
+        .buttons-row, .extras-row {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .buttons-row button, .extras-row button {
+            color: #fff;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color var(--transition-fast), box-shadow var(--transition-fast);
+            text-align: center;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            flex: 1; 
+            justify-content: center;
+            text-transform: uppercase;
+        }
+
+        .buttons-row button:focus, .buttons-row button:hover,
+        .extras-row button:focus, .extras-row button:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .generate-button {
+            background-color: var(--color-btn-green);
+        }
+
+        .generate-button:hover {
+            background-color: var(--color-btn-green-hover);
+        }
+
+        .clear-button {
+            background-color: var(--color-btn-red);
+        }
+
+        .clear-button:hover {
+            background-color: var(--color-btn-red-hover);
+        }
+
+        .copy-button, .save-button {
+            background-color: var(--color-btn-dark);
+        }
+
+        .copy-button:hover, .save-button:hover {
+            background-color: var(--color-btn-dark-hover);
+        }
+
+        /* Inicialmente, a seção de resultado e botões extras fica oculta */
+        .result-section {
+            display: none; 
+            flex-direction: column;
+            gap: var(--spacing-lg);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Close Friends @heulerkretli</h1>
+        <h2>Gerador de Legendas SRT</h2>
+    </header>
+
+    <div class="container">
+        <div class="input-group">
+            <textarea id="roteiro" name="roteiro" placeholder="Cole seu roteiro aqui..."></textarea>
+        </div>
+
+        <!-- Linha de botões superior (Gerar SRT e Limpar Tudo) -->
+        <div class="buttons-row">
+            <button class="generate-button" onclick="gerarSRT()">
+                ⚙️ GERAR SRT
+            </button>
+            <button class="clear-button" onclick="limparRoteiro()">
+                🗑 LIMPAR TUDO
+            </button>
+        </div>
+
+        <!-- Seção do resultado e botões extras, inicialmente oculta -->
+        <div class="result-section" id="resultSection">
+            <div id="resultado"></div>
+            <div class="extras-row">
+                <button class="copy-button" onclick="copiarResultado()">COPIAR SRT</button>
+                <button class="save-button" onclick="downloadSRT()">SALVAR COMO .SRT</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function formatarTempo(segundos) {
+            const horas = Math.floor(segundos / 3600);
+            const minutos = Math.floor((segundos % 3600) / 60);
+            const segs = Math.floor(segundos % 60);
+            const ms = Math.floor((segundos % 1) * 1000);
+            return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segs).padStart(2, '0')},${String(ms).padStart(3, '0')}`;
+        }
+
+        // Divide o texto somente a cada ponto final.
+        function dividirTextoPorPontoFinal(texto) {
+            const frases = texto.split(/\.\s*/);
+            const blocos = frases
+                .map(f => f.trim())
+                .filter(f => f.length > 0)
+                .map(f => f.endsWith('.') ? f : f + '.');
+            return blocos;
+        }
+
+        function gerarSRT() {
+            const texto = document.getElementById('roteiro').value.trim();
+
+            if (!texto) {
+                alert('Por favor, insira o texto do roteiro.');
+                return;
+            }
+
+            const blocos = dividirTextoPorPontoFinal(texto);
+
+            let srt = '';
+            let tempoAtual = 0;
+            const tempoPorBloco = 10; // 10 segundos por bloco
+
+            blocos.forEach((bloco, index) => {
+                const inicio = formatarTempo(tempoAtual);
+                tempoAtual += tempoPorBloco;
+                const fim = formatarTempo(tempoAtual);
+
+                srt += `${index + 1}\n`;
+                srt += `${inicio} --> ${fim}\n`;
+                srt += `${bloco}\n\n`;
+
+                // Adiciona 1 segundo após o fim deste bloco
+                tempoAtual += 1;
+            });
+
+            document.getElementById('resultado').textContent = srt;
+            
+            // Após gerar o SRT, exibe a seção de resultado e botões extras
+            document.getElementById('resultSection').style.display = 'flex';
+        }
+
+        async function copiarResultado() {
+            const resultado = document.getElementById('resultado').textContent;
+            if (!resultado) {
+                alert('Não há SRT para copiar.');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(resultado);
+                alert('SRT copiado para a área de transferência!');
+            } catch (err) {
+                alert('Erro ao copiar: ' + err);
+            }
+        }
+
+        function downloadSRT() {
+            const texto = document.getElementById('resultado').textContent;
+            if (!texto) {
+                alert('Gere o SRT primeiro!');
+                return;
+            }
+
+            const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+
+            a.href = url;
+            a.download = 'legendas.srt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        function limparRoteiro() {
+            document.getElementById('roteiro').value = '';
+            document.getElementById('resultado').textContent = '';
+            // Oculta novamente a seção de resultado ao limpar
+            document.getElementById('resultSection').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

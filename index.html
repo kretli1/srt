@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <!-- Define a codificação e viewport -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Legendas SRT</title>
-    <!-- Fonte Poppins -->
+    <!-- Importa a fonte Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;900&display=swap" rel="stylesheet">
 
     <style>
+        /* Declaração de variáveis globais de estilo */
         :root {
             --color-background: #333;
             --color-surface: #ffffff;
@@ -17,6 +19,7 @@
             --color-text-secondary: #333;
             --color-border: #ddd;
 
+            /* Cores dos botões */
             --color-btn-green: #00c853;
             --color-btn-green-hover: #00b44a;
             --color-btn-red: #ff5252;
@@ -27,26 +30,31 @@
             --font-family-base: 'Poppins', sans-serif;
             --font-size-base: 16px;
 
+            /* Espaçamentos */
             --spacing-xs: 4px;
             --spacing-sm: 8px;
             --spacing-md: 16px;
             --spacing-lg: 24px;
             --spacing-xl: 40px;
 
+            /* Arredondamento */
             --radius-sm: 4px;
             --radius-md: 8px;
 
+            /* Transição */
             --transition-fast: 0.2s ease-in-out;
 
             --placeholder-color: #888;
         }
 
+        /* Reset básico e box-sizing */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
+        /* Estilo base do body */
         body {
             font-family: var(--font-family-base);
             font-size: var(--font-size-base);
@@ -60,6 +68,7 @@
             padding: var(--spacing-lg);
         }
 
+        /* Cabeçalho */
         header {
             text-align: center;
             margin-bottom: var(--spacing-xl);
@@ -67,17 +76,18 @@
 
         header h1 {
             font-size: 1.8rem;
-            font-weight: 900;
+            font-weight: 900; /* Título em negrito forte */
             margin-bottom: var(--spacing-xs);
-            color: #fff;
+            color: #fff; /* Contraste com fundo escuro */
         }
 
         header h2 {
             font-size: 1rem;
             font-weight: 400;
-            color: #ddd;
+            color: #ddd; /* Tom claro para subtítulo */
         }
 
+        /* Container principal onde ficam os elementos do app */
         .container {
             background-color: var(--color-surface);
             border-radius: var(--radius-md);
@@ -90,19 +100,21 @@
             gap: var(--spacing-lg);
         }
 
+        /* Agrupamento do campo de texto */
         .input-group {
             display: flex;
             flex-direction: column;
             gap: var(--spacing-sm);
         }
 
+        /* Estilo da área de texto (roteiro) */
         textarea {
             width: 100%;
             padding: var(--spacing-sm) var(--spacing-md);
             border: 1px solid var(--color-border);
             border-radius: var(--radius-sm);
             font-size: 1rem;
-            resize: vertical;
+            resize: vertical; /* Permite redimensionar verticalmente */
             font-family: var(--font-family-base);
             background-color: #fff;
             transition: border-color var(--transition-fast);
@@ -111,7 +123,7 @@
         }
 
         textarea:focus {
-            border-color: #aaa;
+            border-color: #aaa; /* Muda a borda no focus */
             outline: none;
         }
 
@@ -121,6 +133,16 @@
             font-weight: 400;
         }
 
+        /* Contador de palavras e caracteres */
+        .counter {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--placeholder-color);
+            margin-top: var(--spacing-sm);
+            opacity: 0.8; /* Visual mais suave */
+        }
+
+        /* Resultado SRT */
         #resultado {
             width: 100%;
             min-height: 200px;
@@ -135,6 +157,7 @@
             font-size: 0.9rem;
         }
 
+        /* Texto placeholder quando o resultado está vazio */
         #resultado:empty::before {
             content: "O resultado SRT aparecerá aqui.";
             color: var(--placeholder-color);
@@ -143,12 +166,13 @@
             font-family: var(--font-family-base);
         }
 
-        /* Botões */
+        /* Linhas de botões superiores e inferiores */
         .buttons-row, .extras-row {
             display: flex;
             gap: var(--spacing-sm);
         }
 
+        /* Estilo geral dos botões */
         .buttons-row button, .extras-row button {
             color: #fff;
             padding: var(--spacing-sm) var(--spacing-md);
@@ -162,32 +186,34 @@
             display: inline-flex;
             align-items: center;
             gap: var(--spacing-xs);
-            flex: 1; 
+            flex: 1; /* Todos os botões ocupam o mesmo espaço dentro da linha */
             justify-content: center;
             text-transform: uppercase;
         }
 
+        /* Efeito hover/focus nos botões */
         .buttons-row button:focus, .buttons-row button:hover,
         .extras-row button:focus, .extras-row button:hover {
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
+        /* Botão Gerar SRT (verde) */
         .generate-button {
             background-color: var(--color-btn-green);
         }
-
         .generate-button:hover {
             background-color: var(--color-btn-green-hover);
         }
 
+        /* Botão Limpar Tudo (vermelho) */
         .clear-button {
             background-color: var(--color-btn-red);
         }
-
         .clear-button:hover {
             background-color: var(--color-btn-red-hover);
         }
 
+        /* Botões copiar e salvar (escuros) */
         .copy-button, .save-button {
             background-color: var(--color-btn-dark);
         }
@@ -196,11 +222,18 @@
             background-color: var(--color-btn-dark-hover);
         }
 
-        /* Inicialmente, a seção de resultado e botões extras fica oculta */
+        /* Seção do resultado, inicialmente invisível */
         .result-section {
             display: none; 
             flex-direction: column;
             gap: var(--spacing-lg);
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .result-section.visible {
+            display: flex;
+            opacity: 1;
         }
     </style>
 </head>
@@ -210,32 +243,51 @@
         <h2>Gerador de Legendas SRT</h2>
     </header>
 
+    <!-- Container principal -->
     <div class="container">
         <div class="input-group">
+            <!-- Área de texto para colar o roteiro -->
             <textarea id="roteiro" name="roteiro" placeholder="Cole seu roteiro aqui..."></textarea>
+            <!-- Exibe a contagem de palavras e caracteres -->
+            <div class="counter" id="counter">0 palavras, 0 caracteres</div>
         </div>
 
-        <!-- Linha de botões superior (Gerar SRT e Limpar Tudo) -->
+        <!-- Linha de botões superior: Gerar SRT e Limpar Tudo -->
         <div class="buttons-row">
-            <button class="generate-button" onclick="gerarSRT()">
-                ⚙️ GERAR SRT
-            </button>
-            <button class="clear-button" onclick="limparRoteiro()">
-                🗑 LIMPAR TUDO
-            </button>
+            <button class="generate-button" onclick="gerarSRT()"><strong>GERAR SRT</strong></button>
+            <button class="clear-button" onclick="limparRoteiro()"><strong>LIMPAR TUDO</strong></button>
         </div>
 
-        <!-- Seção do resultado e botões extras, inicialmente oculta -->
+        <!-- Seção do resultado (aparece após gerar o SRT) -->
         <div class="result-section" id="resultSection">
-            <div id="resultado"></div>
+            <div id="resultado" role="status" aria-live="polite"></div>
             <div class="extras-row">
-                <button class="copy-button" onclick="copiarResultado()">COPIAR SRT</button>
-                <button class="save-button" onclick="downloadSRT()">SALVAR COMO .SRT</button>
+                <button class="copy-button" onclick="copiarResultado()"><strong>COPIAR SRT</strong></button>
+                <button class="save-button" onclick="downloadSRT()"><strong>SALVAR COMO .SRT</strong></button>
             </div>
         </div>
     </div>
 
     <script>
+        // Referências aos elementos do DOM
+        const roteiroInput = document.getElementById('roteiro');
+        const counterEl = document.getElementById('counter');
+
+        // Atualiza a contagem de palavras e caracteres a cada digitação
+        roteiroInput.addEventListener('input', atualizarContagem);
+
+        function atualizarContagem() {
+            // Pega o texto do textarea
+            const texto = roteiroInput.value;
+            // Conta palavras (separando por espaços, ignorando vazios)
+            const palavras = texto.trim().split(/\s+/).filter(Boolean).length;
+            // Contagem de caracteres (inclui espaços e quebras de linha)
+            const caracteres = texto.length;
+            // Atualiza o texto do contador
+            counterEl.textContent = `${palavras} palavras, ${caracteres} caracteres`;
+        }
+
+        // Formata o tempo no padrão SRT
         function formatarTempo(segundos) {
             const horas = Math.floor(segundos / 3600);
             const minutos = Math.floor((segundos % 3600) / 60);
@@ -244,9 +296,11 @@
             return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segs).padStart(2, '0')},${String(ms).padStart(3, '0')}`;
         }
 
-        // Divide o texto somente a cada ponto final.
+        // Divide o texto em blocos a cada ponto final
         function dividirTextoPorPontoFinal(texto) {
+            // Divide pelo ponto final seguido de espaço ou fim de string
             const frases = texto.split(/\.\s*/);
+            // Limpa e garante que cada bloco termine com ponto final
             const blocos = frases
                 .map(f => f.trim())
                 .filter(f => f.length > 0)
@@ -254,8 +308,9 @@
             return blocos;
         }
 
+        // Gera o SRT a partir do texto inserido
         function gerarSRT() {
-            const texto = document.getElementById('roteiro').value.trim();
+            const texto = roteiroInput.value.trim();
 
             if (!texto) {
                 alert('Por favor, insira o texto do roteiro.');
@@ -266,8 +321,9 @@
 
             let srt = '';
             let tempoAtual = 0;
-            const tempoPorBloco = 10; // 10 segundos por bloco
+            const tempoPorBloco = 10; // Define 10 segundos por bloco
 
+            // Itera pelos blocos, definindo o início e fim
             blocos.forEach((bloco, index) => {
                 const inicio = formatarTempo(tempoAtual);
                 tempoAtual += tempoPorBloco;
@@ -281,12 +337,14 @@
                 tempoAtual += 1;
             });
 
+            // Exibe o resultado no div #resultado
             document.getElementById('resultado').textContent = srt;
             
-            // Após gerar o SRT, exibe a seção de resultado e botões extras
-            document.getElementById('resultSection').style.display = 'flex';
+            // Torna a seção do resultado visível
+            document.getElementById('resultSection').classList.add('visible');
         }
 
+        // Copia o resultado para a área de transferência
         async function copiarResultado() {
             const resultado = document.getElementById('resultado').textContent;
             if (!resultado) {
@@ -302,6 +360,7 @@
             }
         }
 
+        // Baixa o SRT como arquivo .srt
         function downloadSRT() {
             const texto = document.getElementById('resultado').textContent;
             if (!texto) {
@@ -321,11 +380,9 @@
             window.URL.revokeObjectURL(url);
         }
 
+        // Ao clicar em limpar tudo, recarrega a página
         function limparRoteiro() {
-            document.getElementById('roteiro').value = '';
-            document.getElementById('resultado').textContent = '';
-            // Oculta novamente a seção de resultado ao limpar
-            document.getElementById('resultSection').style.display = 'none';
+            location.reload();
         }
     </script>
 </body>

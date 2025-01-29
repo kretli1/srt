@@ -4,7 +4,7 @@
     <!-- Define a codificação e viewport -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Legendas SRT</title>
+    <title>Gerador de Legendas SRTs</title>
     <!-- Importa a fonte Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
@@ -269,121 +269,170 @@
     </div>
 
     <script>
-        // Referências aos elementos do DOM
-        const roteiroInput = document.getElementById('roteiro');
-        const counterEl = document.getElementById('counter');
+// Referências aos elementos do DOM
+const roteiroInput = document.getElementById('roteiro');
+const counterEl = document.getElementById('counter');
 
-        // Atualiza a contagem de palavras e caracteres a cada digitação
-        roteiroInput.addEventListener('input', atualizarContagem);
+// Atualiza a contagem de palavras e caracteres a cada digitação
+roteiroInput.addEventListener('input', atualizarContagem);
 
-        function atualizarContagem() {
-            // Pega o texto do textarea
-            const texto = roteiroInput.value;
-            // Conta palavras (separando por espaços, ignorando vazios)
-            const palavras = texto.trim().split(/\s+/).filter(Boolean).length;
-            // Contagem de caracteres (inclui espaços e quebras de linha)
-            const caracteres = texto.length;
-            // Atualiza o texto do contador
-            counterEl.textContent = `${palavras} palavras, ${caracteres} caracteres`;
+function atualizarContagem() {
+    // Pega o texto do textarea
+    const texto = roteiroInput.value;
+    // Conta palavras (separando por espaços, ignorando vazios)
+    const palavras = texto.trim().split(/\s+/).filter(Boolean).length;
+    // Contagem de caracteres (inclui espaços e quebras de linha)
+    const caracteres = texto.length;
+    // Atualiza o texto do contador
+    counterEl.textContent = `${palavras} palavras, ${caracteres} caracteres`;
+}
+
+// Formata o tempo no padrão SRT
+function formatarTempo(segundos) {
+    const horas = Math.floor(segundos / 3600);
+    const minutos = Math.floor((segundos % 3600) / 60);
+    const segs = Math.floor(segundos % 60);
+    const ms = Math.floor((segundos % 1) * 1000);
+    return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segs).padStart(2, '0')},${String(ms).padStart(3, '0')}`;
+}
+
+/** 
+ * Substituir a função dividirTextoPorPontoFinal por uma que:
+ * - Usa limite de palavras por bloco (ex.: 300)
+ * - Tenta encontrar o ponto final mais próximo antes ou depois do limite.
+ */
+function dividirTextoPorLimitePalavras(texto, limitePalavras) {
+    let blocos = [];
+    let textoRestante = texto.trim();
+
+    while (textoRestante.length > 0) {
+        // Separa todas as palavras
+        let palavras = textoRestante.split(' ');
+
+        // Pega as primeiras 'limitePalavras' palavras
+        let blocoTemp = palavras.slice(0, limitePalavras).join(' ');
+
+        // Localiza o ponto final no 'blocoTemp' e no restante do texto
+        let ultimoPontoNoBloco = blocoTemp.lastIndexOf('.');
+        let pontoAposBloco = textoRestante.indexOf('.', blocoTemp.length);
+
+        // Se não há mais pontos finais (nem antes, nem depois)
+        if (ultimoPontoNoBloco === -1 && pontoAposBloco === -1) {
+            // Pega tudo que sobrar como um bloco único
+            blocos.push(textoRestante);
+            break;
         }
 
-        // Formata o tempo no padrão SRT
-        function formatarTempo(segundos) {
-            const horas = Math.floor(segundos / 3600);
-            const minutos = Math.floor((segundos % 3600) / 60);
-            const segs = Math.floor(segundos % 60);
-            const ms = Math.floor((segundos % 1) * 1000);
-            return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segs).padStart(2, '0')},${String(ms).padStart(3, '0')}`;
+        // Se não encontrou ponto antes do limite, mas encontrou depois
+        // ou se esse ponto está muito perto do limite (p ex. a menos de 50 chars)
+        if (
+            ultimoPontoNoBloco === -1 ||
+            (pontoAposBloco !== -1 && pontoAposBloco - blocoTemp.length < 50)
+        ) {
+            ultimoPontoNoBloco = pontoAposBloco;
         }
 
-        // Divide o texto em blocos a cada ponto final
-        function dividirTextoPorPontoFinal(texto) {
-            // Divide pelo ponto final seguido de espaço ou fim de string
-            const frases = texto.split(/\.\s*/);
-            // Limpa e garante que cada bloco termine com ponto final
-            const blocos = frases
-                .map(f => f.trim())
-                .filter(f => f.length > 0)
-                .map(f => f.endsWith('.') ? f : f + '.');
-            return blocos;
-        }
+        // Define a posição de corte (+1 para incluir o ponto)
+        let corteFinal = ultimoPontoNoBloco + 1;
+        let blocoFinal = textoRestante.substring(0, corteFinal).trim();
+        blocos.push(blocoFinal);
 
-        // Gera o SRT a partir do texto inserido
-        function gerarSRT() {
-            const texto = roteiroInput.value.trim();
+        // Remove do texto restante
+        textoRestante = textoRestante.substring(corteFinal).trim();
+    }
 
-            if (!texto) {
-                alert('Por favor, insira o texto do roteiro.');
-                return;
-            }
+    return blocos;
+}
 
-            const blocos = dividirTextoPorPontoFinal(texto);
+// Gera o SRT a partir do texto inserido
+function gerarSRT() {
+    const texto = roteiroInput.value.trim();
 
-            let srt = '';
-            let tempoAtual = 0;
-            const tempoPorBloco = 30; // Define 10 segundos por bloco
+    if (!texto) {
+        alert('Por favor, insira o texto do roteiro.');
+        return;
+    }
 
-            // Itera pelos blocos, definindo o início e fim
-            blocos.forEach((bloco, index) => {
-                const inicio = formatarTempo(tempoAtual);
-                tempoAtual += tempoPorBloco;
-                const fim = formatarTempo(tempoAtual);
+    // CHAVE: em vez de chamar dividirTextoPorPontoFinal(texto),
+    // chamamos a nova função que divide por limite de palavras.
+    // Aqui você pode fixar 300 palavras ou deixar dinâmico:
+    const limitePalavras = 300;
+    const blocos = dividirTextoPorLimitePalavras(texto, limitePalavras);
 
-                srt += `${index + 1}\n`;
-                srt += `${inicio} --> ${fim}\n`;
-                srt += `${bloco}\n\n`;
+    let srt = '';
+    let tempoAtual = 0;
+    // Define 30 segundos por bloco
+    const tempoPorBloco = 30;
 
-                // Adiciona 1 segundo após o fim deste bloco
-                tempoAtual += 30;
-            });
+    // Itera pelos blocos, definindo o início e fim
+    blocos.forEach((bloco, index) => {
+        const inicio = formatarTempo(tempoAtual);
+        tempoAtual += tempoPorBloco;
+        const fim = formatarTempo(tempoAtual);
 
-            // Exibe o resultado no div #resultado
-            document.getElementById('resultado').textContent = srt;
-            
-            // Torna a seção do resultado visível
-            document.getElementById('resultSection').classList.add('visible');
-        }
+        srt += `${index + 1}\n`;
+        srt += `${inicio} --> ${fim}\n`;
+        srt += `${bloco}\n\n`;
 
-        // Copia o resultado para a área de transferência
-        async function copiarResultado() {
-            const resultado = document.getElementById('resultado').textContent;
-            if (!resultado) {
-                alert('Não há SRT para copiar.');
-                return;
-            }
+        // Adiciona +30 segundos após o fim deste bloco
+        tempoAtual += 30;
+    });
 
-            try {
-                await navigator.clipboard.writeText(resultado);
-                alert('SRT copiado para a área de transferência!');
-            } catch (err) {
-                alert('Erro ao copiar: ' + err);
-            }
-        }
+    // Exibe o resultado no div #resultado
+    document.getElementById('resultado').textContent = srt;
+    
+    // Se existir alguma seção .classList.add('visible') que queira ativar, mantenha:
+    // document.getElementById('resultSection').classList.add('visible');
+}
 
-        // Baixa o SRT como arquivo .srt
-        function downloadSRT() {
-            const texto = document.getElementById('resultado').textContent;
-            if (!texto) {
-                alert('Gere o SRT primeiro!');
-                return;
-            }
+// Copia o resultado para a área de transferência
+async function copiarResultado() {
+    const resultado = document.getElementById('resultado').textContent;
+    if (!resultado) {
+        alert('Não há SRT para copiar.');
+        return;
+    }
 
-            const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
+    try {
+        await navigator.clipboard.writeText(resultado);
+        alert('SRT copiado para a área de transferência!');
+    } catch (err) {
+        alert('Erro ao copiar: ' + err);
+    }
+}
 
-            a.href = url;
-            a.download = 'legendas.srt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }
+// Baixa o SRT como arquivo .srt
+function downloadSRT() {
+    const texto = document.getElementById('resultado').textContent;
+    if (!texto) {
+        alert('Gere o SRT primeiro!');
+        return;
+    }
 
-        // Ao clicar em limpar tudo, recarrega a página
-        function limparRoteiro() {
-            location.reload();
-        }
-    </script>
+    const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+
+    a.href = url;
+    a.download = 'legendas.srt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+// Ao clicar em limpar tudo, AGORA APENAS limpamos sem recarregar a página
+function limparRoteiro() {
+    // Apaga o conteúdo do textarea
+    roteiroInput.value = '';
+    // Apaga o texto do resultado
+    document.getElementById('resultado').textContent = '';
+    // Atualiza o contador de palavras/char para zero
+    atualizarContagem();
+    // Remove a classe 'visible' da seção de resultado (se necessário)
+    // document.getElementById('resultSection').classList.remove('visible');
+}
+</script>
+
 </body>
 </html>

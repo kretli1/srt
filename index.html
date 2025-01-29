@@ -267,6 +267,7 @@
             </div>
         </div>
     </div>
+
     <script>
         // Referências aos elementos do DOM
         const roteiroInput = document.getElementById('roteiro');
@@ -283,7 +284,7 @@
             // Contagem de caracteres (inclui espaços e quebras de linha)
             const caracteres = texto.length;
             // Atualiza o texto do contador
-            counterEl.textContent = ${palavras} palavras, ${caracteres} caracteres;
+            counterEl.textContent = `${palavras} palavras, ${caracteres} caracteres`;
         }
 
         // Formata o tempo no padrão SRT
@@ -292,7 +293,7 @@
             const minutos = Math.floor((segundos % 3600) / 60);
             const segs = Math.floor(segundos % 60);
             const ms = Math.floor((segundos % 1) * 1000);
-            return ${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segs).padStart(2, '0')},${String(ms).padStart(3, '0')};
+            return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segs).padStart(2, '0')},${String(ms).padStart(3, '0')}`;
         }
 
         // Divide o texto em blocos a cada ponto final
@@ -328,9 +329,9 @@
                 tempoAtual += tempoPorBloco;
                 const fim = formatarTempo(tempoAtual);
 
-                srt += ${index + 1}\n;
-                srt += ${inicio} --> ${fim}\n;
-                srt += ${bloco}\n\n;
+                srt += `${index + 1}\n`;
+                srt += `${inicio} --> ${fim}\n`;
+                srt += `${bloco}\n\n`;
 
                 // Adiciona 1 segundo após o fim deste bloco
                 tempoAtual += 30;

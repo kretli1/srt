@@ -4,7 +4,7 @@
     <!-- Define a codificação e viewport -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Legendas SRT</title>
+    <title>Gerador de Legendas SRTs</title>
     <!-- Importa a fonte Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
@@ -329,12 +329,12 @@
                 tempoAtual += tempoPorBloco;
                 const fim = formatarTempo(tempoAtual);
 
-                srt += `${index + 30}\n`;
+                srt += `${index + 1}\n`;
                 srt += `${inicio} --> ${fim}\n`;
                 srt += `${bloco}\n\n`;
 
                 // Adiciona 1 segundo após o fim deste bloco
-                tempoAtual += 1;
+                tempoAtual += 30;
             });
 
             // Exibe o resultado no div #resultado

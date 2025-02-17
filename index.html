@@ -1,438 +1,168 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <!-- Define a codificação e viewport -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Legendas SRTs</title>
-    <!-- Importa a fonte Poppins -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;900&display=swap" rel="stylesheet">
-
+    <title>Conversor de Texto para SRT Aprimorado</title>
     <style>
-        /* Declaração de variáveis globais de estilo */
-        :root {
-            --color-background: #333;
-            --color-surface: #ffffff;
-            --color-text-primary: #111;
-            --color-text-secondary: #333;
-            --color-border: #ddd;
-
-            /* Cores dos botões */
-            --color-btn-green: #00c853;
-            --color-btn-green-hover: #00b44a;
-            --color-btn-red: #ff5252;
-            --color-btn-red-hover: #e04848;
-            --color-btn-dark: #333;
-            --color-btn-dark-hover: #222;
-
-            --font-family-base: 'Poppins', sans-serif;
-            --font-size-base: 16px;
-
-            /* Espaçamentos */
-            --spacing-xs: 4px;
-            --spacing-sm: 8px;
-            --spacing-md: 16px;
-            --spacing-lg: 24px;
-            --spacing-xl: 40px;
-
-            /* Arredondamento */
-            --radius-sm: 4px;
-            --radius-md: 8px;
-
-            /* Transição */
-            --transition-fast: 0.2s ease-in-out;
-
-            --placeholder-color: #888;
-        }
-
-        /* Reset básico e box-sizing */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Estilo base do body */
         body {
-            font-family: var(--font-family-base);
-            font-size: var(--font-size-base);
-            background: var(--color-background);
-            color: var(--color-text-primary);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            min-height: 100vh;
-            padding: var(--spacing-lg);
-        }
-
-        /* Cabeçalho */
-        header {
-            text-align: center;
-            margin-bottom: var(--spacing-xl);
-        }
-
-        header h1 {
-            font-size: 1.8rem;
-            font-weight: 900; /* Título em negrito forte */
-            margin-bottom: var(--spacing-xs);
-            color: #fff; /* Contraste com fundo escuro */
-        }
-
-        header h2 {
-            font-size: 1rem;
-            font-weight: 400;
-            color: #ddd; /* Tom claro para subtítulo */
-        }
-
-        /* Container principal onde ficam os elementos do app */
-        .container {
-            background-color: var(--color-surface);
-            border-radius: var(--radius-md);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            padding: var(--spacing-xl);
+            font-family: Arial, sans-serif;
             max-width: 600px;
-            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: var(--spacing-lg);
+            min-height: 100vh;
         }
-
-        /* Agrupamento do campo de texto */
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-sm);
-        }
-
-        /* Estilo da área de texto (roteiro) */
         textarea {
             width: 100%;
-            padding: var(--spacing-sm) var(--spacing-md);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-sm);
-            font-size: 1rem;
-            resize: vertical; /* Permite redimensionar verticalmente */
-            font-family: var(--font-family-base);
-            background-color: #fff;
-            transition: border-color var(--transition-fast);
-            min-height: 180px;
-            font-weight: 400;
+            height: 200px;
         }
-
-        textarea:focus {
-            border-color: #aaa; /* Muda a borda no focus */
-            outline: none;
-        }
-
-        textarea::placeholder {
-            color: var(--placeholder-color);
-            font-style: italic;
-            font-weight: 400;
-        }
-
-        /* Contador de palavras e caracteres */
-        .counter {
-            text-align: center;
-            font-size: 0.85rem;
-            color: var(--placeholder-color);
-            margin-top: var(--spacing-sm);
-            opacity: 0.8; /* Visual mais suave */
-        }
-
-        /* Resultado SRT */
         #resultado {
-            width: 100%;
-            min-height: 200px;
-            padding: var(--spacing-md);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-sm);
-            background-color: #fcfcfc;
-            white-space: pre;
-            overflow: auto;
-            font-family: monospace;
-            color: #333;
-            font-size: 0.9rem;
+            white-space: pre-wrap;
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-top: 20px;
         }
-
-        /* Texto placeholder quando o resultado está vazio */
-        #resultado:empty::before {
-            content: "O resultado SRT aparecerá aqui.";
-            color: var(--placeholder-color);
-            font-style: italic;
-            font-weight: 400;
-            font-family: var(--font-family-base);
-        }
-
-        /* Linhas de botões superiores e inferiores */
-        .buttons-row, .extras-row {
+        .botoes {
             display: flex;
-            gap: var(--spacing-sm);
+            justify-content: space-between;
+            margin-top: 10px;
         }
-
-        /* Estilo geral dos botões */
-        .buttons-row button, .extras-row button {
-            color: #fff;
-            padding: var(--spacing-sm) var(--spacing-md);
-            border: none;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background-color var(--transition-fast), box-shadow var(--transition-fast);
+        #downloadBtn, #limparBtn {
+            display: none;
+        }
+        footer {
+            margin-top: auto;
             text-align: center;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: var(--spacing-xs);
-            flex: 1; /* Todos os botões ocupam o mesmo espaço dentro da linha */
-            justify-content: center;
-            text-transform: uppercase;
-        }
-
-        /* Efeito hover/focus nos botões */
-        .buttons-row button:focus, .buttons-row button:hover,
-        .extras-row button:focus, .extras-row button:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        /* Botão Gerar SRT (verde) */
-        .generate-button {
-            background-color: var(--color-btn-green);
-        }
-        .generate-button:hover {
-            background-color: var(--color-btn-green-hover);
-        }
-
-        /* Botão Limpar Tudo (vermelho) */
-        .clear-button {
-            background-color: var(--color-btn-red);
-        }
-        .clear-button:hover {
-            background-color: var(--color-btn-red-hover);
-        }
-
-        /* Botões copiar e salvar (escuros) */
-        .copy-button, .save-button {
-            background-color: var(--color-btn-dark);
-        }
-
-        .copy-button:hover, .save-button:hover {
-            background-color: var(--color-btn-dark-hover);
-        }
-
-        /* Seção do resultado, inicialmente invisível */
-        .result-section {
-            display: none; 
-            flex-direction: column;
-            gap: var(--spacing-lg);
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-
-        .result-section.visible {
-            display: flex;
-            opacity: 1;
+            padding: 10px;
+            background-color: #f0f0f0;
+            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Close Friends @heulerkretli</h1>
-        <h2>Gerador de Legendas SRT</h2>
-    </header>
-
-    <!-- Container principal -->
-    <div class="container">
-        <div class="input-group">
-            <!-- Área de texto para colar o roteiro -->
-            <textarea id="roteiro" name="roteiro" placeholder="Cole seu roteiro aqui..."></textarea>
-            <!-- Exibe a contagem de palavras e caracteres -->
-            <div class="counter" id="counter">0 palavras, 0 caracteres</div>
-        </div>
-
-        <!-- Linha de botões superior: Gerar SRT e Limpar Tudo -->
-        <div class="buttons-row">
-            <button class="generate-button" onclick="gerarSRT()"><strong>GERAR SRT</strong></button>
-            <button class="clear-button" onclick="limparRoteiro()"><strong>LIMPAR TUDO</strong></button>
-        </div>
-
-        <!-- Seção do resultado (aparece após gerar o SRT) -->
-        <div class="result-section" id="resultSection">
-            <div id="resultado" role="status" aria-live="polite"></div>
-            <div class="extras-row">
-                <button class="copy-button" onclick="copiarResultado()"><strong>COPIAR SRT</strong></button>
-                <button class="save-button" onclick="downloadSRT()"><strong>SALVAR COMO .SRT</strong></button>
-            </div>
-        </div>
+    <h1>Conversor de Texto para SRT Aprimorado</h1>
+    <form id="conversorForm">
+        <label for="textoInput">Cole seu texto aqui:</label><br>
+        <textarea id="textoInput" required></textarea><br>
+        <button type="submit">Converter para SRT</button>
+    </form>
+    <div class="botoes">
+        <button id="downloadBtn">Download SRT</button>
+        <button type="button" id="limparBtn">Limpar Campo</button>
     </div>
+    <div id="resultado"></div>
+
+    <footer>
+        Desenvolvido por WEBDARK
+    </footer>
 
     <script>
-// Referências aos elementos do DOM
-const roteiroInput = document.getElementById('roteiro');
-const counterEl = document.getElementById('counter');
+        (function() {
+            const CARACTERES_POR_BLOCO = 500;
+            const PALAVRAS_MIN_BLOCO = 80;
+            const PALAVRAS_MAX_BLOCO = 100;
+            const DURACAO_BLOCO = 30;
+            const INTERVALO_ENTRE_BLOCOS = 10; // Mudança feita aqui
 
-// Atualiza a contagem de palavras e caracteres a cada digitação
-roteiroInput.addEventListener('input', atualizarContagem);
+            function converterParaSRT(texto) {
+                let srt = '';
+                let contador = 1;
+                let tempoAcumulado = 0;
+                let palavras = texto.split(/\s+/);
+                let blocoAtual = '';
+                let palavrasNoBloco = 0;
 
-function atualizarContagem() {
-    // Pega o texto do textarea
-    const texto = roteiroInput.value;
-    // Conta palavras (separando por espaços, ignorando vazios)
-    const palavras = texto.trim().split(/\s+/).filter(Boolean).length;
-    // Contagem de caracteres (inclui espaços e quebras de linha)
-    const caracteres = texto.length;
-    // Atualiza o texto do contador
-    counterEl.textContent = `${palavras} palavras, ${caracteres} caracteres`;
-}
+                for (let palavra of palavras) {
+                    if (blocoAtual.length + palavra.length <= CARACTERES_POR_BLOCO && palavrasNoBloco < PALAVRAS_MAX_BLOCO) {
+                        blocoAtual += palavra + ' ';
+                        palavrasNoBloco++;
+                    } else {
+                        let ultimoPontoFinal = blocoAtual.lastIndexOf('.');
+                        if (ultimoPontoFinal !== -1 && ultimoPontoFinal !== blocoAtual.length - 1) {
+                            let resto = blocoAtual.substring(ultimoPontoFinal + 1);
+                            blocoAtual = blocoAtual.substring(0, ultimoPontoFinal + 1);
+                            srt += formatarBlocoSRT(contador, tempoAcumulado, blocoAtual);
+                            contador++;
+                            tempoAcumulado += DURACAO_BLOCO + INTERVALO_ENTRE_BLOCOS;
+                            blocoAtual = resto + palavra + ' ';
+                            palavrasNoBloco = resto.split(/\s+/).length + 1;
+                        } else {
+                            srt += formatarBlocoSRT(contador, tempoAcumulado, blocoAtual);
+                            contador++;
+                            tempoAcumulado += DURACAO_BLOCO + INTERVALO_ENTRE_BLOCOS;
+                            blocoAtual = palavra + ' ';
+                            palavrasNoBloco = 1;
+                        }
+                    }
+                }
 
-// Formata o tempo no padrão SRT
-function formatarTempo(segundos) {
-    const horas = Math.floor(segundos / 3600);
-    const minutos = Math.floor((segundos % 3600) / 60);
-    const segs = Math.floor(segundos % 60);
-    const ms = Math.floor((segundos % 1) * 1000);
-    return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segs).padStart(2, '0')},${String(ms).padStart(3, '0')}`;
-}
+                if (blocoAtual) {
+                    srt += formatarBlocoSRT(contador, tempoAcumulado, blocoAtual);
+                }
 
-/** 
- * Substituir a função dividirTextoPorPontoFinal por uma que:
- * - Usa limite de palavras por bloco (ex.: 300)
- * - Tenta encontrar o ponto final mais próximo antes ou depois do limite.
- */
-function dividirTextoPorLimitePalavras(texto, limitePalavras) {
-    let blocos = [];
-    let textoRestante = texto.trim();
+                return srt.trim();
+            }
 
-    while (textoRestante.length > 0) {
-        // Separa todas as palavras
-        let palavras = textoRestante.split(' ');
+            function formatarBlocoSRT(contador, tempoInicio, texto) {
+                const tempoFim = tempoInicio + DURACAO_BLOCO;
+                return `${contador}\n${formatarTempo(tempoInicio)} --> ${formatarTempo(tempoFim)}\n${texto.trim()}\n\n`;
+            }
 
-        // Pega as primeiras 'limitePalavras' palavras
-        let blocoTemp = palavras.slice(0, limitePalavras).join(' ');
+            function formatarTempo(segundos) {
+                const horas = Math.floor(segundos / 3600);
+                const minutos = Math.floor((segundos % 3600) / 60);
+                const segsRestantes = Math.floor(segundos % 60);
+                const milissegundos = Math.floor((segundos % 1) * 1000);
 
-        // Localiza o ponto final no 'blocoTemp' e no restante do texto
-        let ultimoPontoNoBloco = blocoTemp.lastIndexOf('.');
-        let pontoAposBloco = textoRestante.indexOf('.', blocoTemp.length);
+                return `${pad(horas)}:${pad(minutos)}:${pad(segsRestantes)},${pad(milissegundos, 3)}`;
+            }
 
-        // Se não há mais pontos finais (nem antes, nem depois)
-        if (ultimoPontoNoBloco === -1 && pontoAposBloco === -1) {
-            // Pega tudo que sobrar como um bloco único
-            blocos.push(textoRestante);
-            break;
-        }
+            function pad(numero, tamanho = 2) {
+                return numero.toString().padStart(tamanho, '0');
+            }
 
-        // Se não encontrou ponto antes do limite, mas encontrou depois
-        // ou se esse ponto está muito perto do limite (p ex. a menos de 50 chars)
-        if (
-            ultimoPontoNoBloco === -1 ||
-            (pontoAposBloco !== -1 && pontoAposBloco - blocoTemp.length < 50)
-        ) {
-            ultimoPontoNoBloco = pontoAposBloco;
-        }
+            function downloadSRT(conteudo) {
+                const blob = new Blob([conteudo], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'legendas.srt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
 
-        // Define a posição de corte (+1 para incluir o ponto)
-        let corteFinal = ultimoPontoNoBloco + 1;
-        let blocoFinal = textoRestante.substring(0, corteFinal).trim();
-        blocos.push(blocoFinal);
+            document.getElementById('conversorForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const texto = document.getElementById('textoInput').value;
+                const srt = converterParaSRT(texto);
+                document.getElementById('resultado').textContent = srt;
+                document.getElementById('downloadBtn').style.display = 'block';
+                document.getElementById('limparBtn').style.display = 'block';
+            });
 
-        // Remove do texto restante
-        textoRestante = textoRestante.substring(corteFinal).trim();
-    }
+            document.getElementById('downloadBtn').addEventListener('click', function() {
+                const srt = document.getElementById('resultado').textContent;
+                downloadSRT(srt);
+            });
 
-    return blocos;
-}
+            document.getElementById('limparBtn').addEventListener('click', function() {
+                document.getElementById('textoInput').value = '';
+                document.getElementById('resultado').textContent = '';
+                document.getElementById('downloadBtn').style.display = 'none';
+                document.getElementById('limparBtn').style.display = 'none';
+            });
 
-// Gera o SRT a partir do texto inserido
-function gerarSRT() {
-    const texto = roteiroInput.value.trim();
-
-    if (!texto) {
-        alert('Por favor, insira o texto do roteiro.');
-        return;
-    }
-
-    // CHAVE: em vez de chamar dividirTextoPorPontoFinal(texto),
-    // chamamos a nova função que divide por limite de palavras.
-    // Aqui você pode fixar 300 palavras ou deixar dinâmico:
-    const limitePalavras = 300;
-    const blocos = dividirTextoPorLimitePalavras(texto, limitePalavras);
-
-    let srt = '';
-    let tempoAtual = 0;
-    // Define 30 segundos por bloco
-    const tempoPorBloco = 30;
-
-    // Itera pelos blocos, definindo o início e fim
-    blocos.forEach((bloco, index) => {
-        const inicio = formatarTempo(tempoAtual);
-        tempoAtual += tempoPorBloco;
-        const fim = formatarTempo(tempoAtual);
-
-        srt += `${index + 1}\n`;
-        srt += `${inicio} --> ${fim}\n`;
-        srt += `${bloco}\n\n`;
-
-        // Adiciona +30 segundos após o fim deste bloco
-        tempoAtual += 30;
-    });
-
-    // Exibe o resultado no div #resultado
-    document.getElementById('resultado').textContent = srt;
-    
-    // Se existir alguma seção .classList.add('visible') que queira ativar, mantenha:
-    // document.getElementById('resultSection').classList.add('visible');
-}
-
-// Copia o resultado para a área de transferência
-async function copiarResultado() {
-    const resultado = document.getElementById('resultado').textContent;
-    if (!resultado) {
-        alert('Não há SRT para copiar.');
-        return;
-    }
-
-    try {
-        await navigator.clipboard.writeText(resultado);
-        alert('SRT copiado para a área de transferência!');
-    } catch (err) {
-        alert('Erro ao copiar: ' + err);
-    }
-}
-
-// Baixa o SRT como arquivo .srt
-function downloadSRT() {
-    const texto = document.getElementById('resultado').textContent;
-    if (!texto) {
-        alert('Gere o SRT primeiro!');
-        return;
-    }
-
-    const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-
-    a.href = url;
-    a.download = 'legendas.srt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-}
-
-// Ao clicar em limpar tudo, AGORA APENAS limpamos sem recarregar a página
-function limparRoteiro() {
-    // Apaga o conteúdo do textarea
-    roteiroInput.value = '';
-    // Apaga o texto do resultado
-    document.getElementById('resultado').textContent = '';
-    // Atualiza o contador de palavras/char para zero
-    atualizarContagem();
-    // Remove a classe 'visible' da seção de resultado (se necessário)
-    // document.getElementById('resultSection').classList.remove('visible');
-}
-</script>
-
+            document.oncontextmenu = function() { return false; };
+            document.onkeydown = function(e) {
+                if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0))) {
+                    return false;
+                }
+            };
+        })();
+    </script>
 </body>
 </html>
